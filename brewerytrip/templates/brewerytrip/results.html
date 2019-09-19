@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Brewery Trip</title>
+</head>
+<body>
+<h1>These are the results :)</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if latitude and longitude %}
+    <p>Here goes the result...</p>
+{% else %}
+    <p>Oopsie! How did you get here?</p>
+{% endif %}
+<li><a href="{% url 'brewerytrip:index' %}">Try other coordinates...</a></li>
+
+</body>
+</html>

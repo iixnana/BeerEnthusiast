@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load bootstrap3 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    <title>Brewery Trip</title>
+</head>
+<body>
+<h1>Welcome to Brewery Trip!</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
+    {% csrf_token %}
+    <div class="form-group">
+        <input type="text" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"/>
+    </div>
+    <div class="form-group">
+        <input type="text" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"/>
+
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+</form>
+
+
+<!---{% if breweries %}
+    <ul>
+        {% for brewery in breweries %}
+            <li><a href="{% url 'brewerytrip:results' %}">{{ brewery.name }}</a> </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No breweries are available.</p>
+{% endif %}--->
+</body>
+</html>
