@@ -7,6 +7,9 @@ class GeocodeManager(models.Manager):
         point = self.get(brewery_id__exact=id)
         return (point.latitude, point.longitude)
 
+    def find_by_id(self, id):
+        return self.get(brewery_id__exact=id)
+
 class Geocode(models.Model):
     id = models.IntegerField(primary_key=True)
     brewery = models.ForeignKey(Brewery, on_delete=models.CASCADE)

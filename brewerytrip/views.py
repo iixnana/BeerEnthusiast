@@ -6,9 +6,12 @@ from . import models
 # Create your views here.
 
 def index(request):
-    models.print_list((51.355468, 11.100790), 1000)
-    breweries = models.Brewery.objects.order_by('name')[:10]
-    context = {'breweries': breweries}
+    point = (51.355468, 11.100790)
+    list = models.list(point, 1000)  # filter to breweries in 1000km circle - it's impossible to go more far
+    measure = models.measure_distance(point, list)
+    models.weigh_directions(measure)
+    # breweries = models.Brewery.objects.order_by('name')[:10]
+    context = {'list': measure}
     return render(request, 'brewerytrip/index.html', context)
 
 
