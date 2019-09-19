@@ -22,14 +22,14 @@ class BreweryManager(models.Manager):
                 dis = distance(point, coord)
                 value = beers * (1 - (dis / 1000))
                 dir = []  # set direction
-                if (coord[0] >= point[0]):  # Latitude
-                    dir.append("N")
+                if (coord[0] >= point[0] and coord[1] >= point[1]):  # Latitude
+                    dir = 'NE'
+                elif (coord[0] <= point[0] and coord[1] >= point[1]):
+                    dir = 'SE'
+                elif (coord[0] >= point[0] and coord[1] <= point[1]):  # Longitude
+                    dir = 'NW'
                 else:
-                    dir.append("S")
-                if (coord[1] >= point[1]):  # Longitude
-                    dir.append("E")
-                else:
-                    dir.append("W")
+                    dir = 'SW'
                 coord_list.append((var.id, beers, dis, value, dir, coord))
         return coord_list
 

@@ -10,8 +10,10 @@ def index(request):
     list = models.list(point, 1000)  # filter to breweries in 1000km circle - it's impossible to go more far
     measure = models.measure_distance(point, list)
     models.weigh_directions(measure)
+    pick = models.pick(models.weigh_directions(measure), measure, point)
     # breweries = models.Brewery.objects.order_by('name')[:10]
-    context = {'list': measure}
+    context = {'list': measure,
+               'first_stop': pick}
     return render(request, 'brewerytrip/index.html', context)
 
 
