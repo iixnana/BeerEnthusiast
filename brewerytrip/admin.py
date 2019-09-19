@@ -1,10 +1,8 @@
 from django.contrib import admin
-from .models import Beer
-from .models import Brewery
-from .models import Geocode
+from . import models
+
 
 # Register your models here.
-
-admin.site.register(Beer)
-admin.site.register(Brewery)
-admin.site.register(Geocode)
+admin.site.register(models.Beer)
+admin.site.register(models.Brewery)
+admin.site.register(models.Geocode)
