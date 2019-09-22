@@ -13,9 +13,9 @@ def greedy_star(home):
     total_list = get_list(home, 1000)  # 1000km radius is maximum distance we can reach
     measured_list = list_distance(home, total_list)  # Count distances, directions; general list with coordinates
     layer, dir = layer_and_direction(measured_list)
-    if (layer == 0):
+    if layer == 0:
         area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 350, measured_list), key=itemgetter(1), reverse=True)
-    elif (layer == 1):
+    elif layer == 1:
         area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1), reverse=True)
     else:
         area = sorted(filter(lambda x: x[3] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
@@ -39,8 +39,20 @@ def greedy_star(home):
         print(km)
         print(collected_beers)
         area = recount_distances(point, area)
-    km -= distance(point, home)
-    print(km)
+    if km - distance(point, home) >= 0:
+        total = 0
+        detour = detour_list(point, home, distance(point, home), area)
+        home = [0, 0, distance(point, home), '', home]
+        queue = make_queue(point, home, km, detour)
+        for var in queue:
+            total += distance(point, var[4])
+            collected_beers += var[1]
+            point = var[4]
+        km -= total
+        print("Finished with %s. Collected %s" % (km, collected_beers))
+    else:
+        km -= distance(point, home)
+
     return queue
 
 
@@ -84,7 +96,7 @@ def greedy_star(home):
 
 
 def make_queue(start, end, km, detour):
-    if (km > 300): km = 250
+    if (km > 250): km = 250
     queue = [end]
     while km > 0 and len(detour) > 0:
         total_distance = 0
@@ -104,6 +116,7 @@ def recount_distances(point, area):
     return area
 
 
+"""
 def pick(dir, list, point):
     print(dir)
     list = filter(lambda x: x[4] == dir, list)
@@ -137,7 +150,7 @@ def pick(dir, list, point):
     km -= distance(group1[0][5], home)  # go home
     print("End %s %s" % (km, collected_beers))
     return km
-
+"""
 
 # Count value of layers and directions
 def layer_and_direction(list):
