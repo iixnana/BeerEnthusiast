@@ -24,6 +24,7 @@ def greedy_star(home):
     collected_beers = 0
     point = home
     changed = True
+    route = [home]
     while km - distance(point, area[0][4]) - distance(area[0][4], home) >= 0 and changed:
         changed = False
         detour = detour_list(point, area[0][4], area[0][2], area)
@@ -34,6 +35,7 @@ def greedy_star(home):
             collected_beers += var[1]
             area.remove(var)
             point = var[4]
+            route.append(var)
             changed = True
         km -= total
         print(km)
@@ -43,60 +45,21 @@ def greedy_star(home):
         total = 0
         detour = detour_list(point, home, distance(point, home), area)
         home = [0, 0, distance(point, home), '', home]
-        queue = make_queue(point, home, km, detour)
+        queue = make_queue(point, home, km - home[2], detour)
         for var in queue:
             total += distance(point, var[4])
             collected_beers += var[1]
             point = var[4]
+            route.append(var)
         km -= total
-        print("Finished with %s. Collected %s" % (km, collected_beers))
+        print("Finished with %dkm left. Collected %s" % (km, collected_beers))
     else:
-        km -= distance(point, home)
-
-    return queue
-
-
-"""
-    detour = detour_list(home, area[0][4], area[0][2], area)
-    queue = make_queue(home, area[0], 300, detour)
-    total = 0
-    for var in queue:
-        total += distance(point, var[4])
-        collected_beers += var[1]
-        area.remove(var)
-        point = var[4]
-
-    print(total)
-    print(collected_beers)
-
-    area = recount_distances(point, area)
-
-    detour = detour_list(point, area[0][4], area[0][2], area)
-    queue = make_queue(point, area[0], 300, detour)
-    for var in queue:
-        total += distance(point, var[4])
-        collected_beers += var[1]
-        area.remove(var)
-        point = var[4]
-    print(total)
-    print(collected_beers)
-
-    area = recount_distances(point, area)
-
-    detour = detour_list(point, area[0][4], area[0][2], area)
-    queue = make_queue(point, area[0], 300, detour)
-    for var in queue:
-        total += distance(point, var[4])
-        collected_beers += var[1]
-        area.remove(var)
-        point = var[4]
-    print(total)
-    print(collected_beers)
-"""
+        print("Error :(")
+    return route
 
 
 def make_queue(start, end, km, detour):
-    if (km > 250): km = 250
+    if km > 250: km = 250
     queue = [end]
     while km > 0 and len(detour) > 0:
         total_distance = 0
@@ -116,47 +79,11 @@ def recount_distances(point, area):
     return area
 
 
-"""
-def pick(dir, list, point):
-    print(dir)
-    list = filter(lambda x: x[4] == dir, list)
-    group = [0, 0, 0]
-    group0 = []
-    group1 = []
-    group2 = []
-    for var in list:
-        if 0 <= var[2] < 350:
-            group[0] += var[3]
-            group0.append(var)
-        elif 350 <= var[2] < 700:
-            group[1] += var[3]
-            group1.append(var)
-        else:
-            group[2] += var[3]
-            group2.append(var)
-    print("Group 0 %s" % group[0])
-    print("Group 1 %s" % group[1])
-    print("Group 2 %s" % group[2])
-    group1 = sorted(group1, key=itemgetter(3), reverse=True)
-    group0 = sorted(group0, key=itemgetter(3), reverse=True)
-    km = 2000
-    collected_beers = 0
-    home = point
-    while (km - distance(group1[0][5], point) >= distance(group1[0][5], home)):
-        km -= distance(group1[0][5], point)
-        point = group1[0][5]
-        collected_beers += group1[0][1]
-        group1.pop(0)
-    km -= distance(group1[0][5], home)  # go home
-    print("End %s %s" % (km, collected_beers))
-    return km
-"""
-
 # Count value of layers and directions
-def layer_and_direction(list):
+def layer_and_direction(filtered_list):
     group = [0, 0, 0]
     directions = [['NE', 0], ['SE', 0], ['NW', 0], ['SW', 0]]
-    for var in list:
+    for var in filtered_list:
         if 0 <= var[2] < 350:
             if (var[3] == 'NE'):
                 directions[0][1] += var[1]
@@ -204,8 +131,9 @@ def layer_and_direction(list):
     return layer, dir
 
 
-def detour_list(start, end, distance, area):
-    return list(filter(lambda x: x[2] < distance and edge(start, end, x[4]) <= 5, area))
+# Filter area to breweries on 10 degrees, up to
+def detour_list(start, end, dist, area):
+    return list(filter(lambda x: x[2] < dist and edge(start, end, x[4]) <= 17, area))
 
 
 # Count edge of a triangle
