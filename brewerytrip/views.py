@@ -7,12 +7,6 @@ from . import models
 
 def index(request):
     point = (51.355468, 11.100790)
-    """
-    list = models.list(point, 1000)  # filter to breweries in 1000km circle - it's impossible to go more far
-    measure = models.measure_distance(point, list)
-    models.weigh_directions(measure)
-    pick = models.pick(models.weigh_directions(measure), measure, point)
-    models.layers(point, measure)"""
     breweries = models.greedy_star(point)
     # breweries = models.Brewery.objects.order_by('name')[:10]
     context = {'list': breweries,
@@ -25,9 +19,12 @@ def debug(request, brewery_id):
     beers = models.Beer.objects.beer_count(brewery_id)
     return HttpResponse("Brewery {} {} {}".format(geoloc[0], geoloc[1], beers))
 
+
 def results(request):
-    latitude = request.POST['latitude']
-    longitude = request.POST['longitude']
+    latitude = float(request.POST['latitude'])
+    longitude = float(request.POST['longitude'])
+    result = models.greedy_star((latitude, longitude))
     context = {'latitude': latitude,
-               'longitude': longitude}
+               'longitude': longitude,
+               'result': result}
     return render(request, 'brewerytrip/results.html', context)

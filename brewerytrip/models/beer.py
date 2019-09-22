@@ -4,12 +4,10 @@ from .brewery import Brewery
 
 class BeerManager(models.Manager):
     def beer_count(self, id):
-        beersCount = self.filter(brewery_id__exact=id).count()
-        return beersCount
+        return self.filter(brewery_id__exact=id).count()
 
     def beer_types(self, id):
-        beers = self.filter(brewery_id__exact=id)
-        return beers
+        return self.filter(brewery_id__exact=id)
 
 
 class Beer(models.Model):

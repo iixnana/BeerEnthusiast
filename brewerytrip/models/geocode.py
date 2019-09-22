@@ -5,7 +5,7 @@ from .brewery import Brewery
 class GeocodeManager(models.Manager):
     def coordinates(self, id):
         point = self.get(brewery_id__exact=id)
-        return (point.latitude, point.longitude)
+        return point.latitude, point.longitude
 
     def find_by_id(self, id):
         return self.get(brewery_id__exact=id)

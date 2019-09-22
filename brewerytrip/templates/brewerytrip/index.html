@@ -12,6 +12,17 @@
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
+
+<form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
+    {% csrf_token %}
+    <input type="hidden" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"
+           value="51.355468"/>
+    <input type="hidden" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"
+           value="11.100790"/>
+    <button type="submit" class="btn btn-primary">Try (51.355468, 11.100790)</button>
+
+</form>
+<br/>
 <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
     {% csrf_token %}
     <div class="form-group">
@@ -22,17 +33,7 @@
 
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
-
 </form>
 
-{% if list %}
-    <ul>
-        {% for var in list %}
-            <li>{{ var }}</li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No list is available.</p>
-{% endif %}
 </body>
 </html>

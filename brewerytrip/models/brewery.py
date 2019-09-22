@@ -21,11 +21,11 @@ class BreweryManager(models.Manager):
                 coord = Geocode.objects.coordinates(var.id)
                 dis = distance(point, coord)
                 dir = []  # set direction
-                if (coord[0] >= point[0] and coord[1] >= point[1]):  # Latitude
+                if coord[0] >= point[0] and coord[1] >= point[1]:  # Latitude
                     dir = 'NE'
-                elif (coord[0] <= point[0] and coord[1] >= point[1]):
+                elif coord[0] <= point[0] and coord[1] >= point[1]:
                     dir = 'SE'
-                elif (coord[0] >= point[0] and coord[1] <= point[1]):  # Longitude
+                elif coord[0] >= point[0] and coord[1] <= point[1]:  # Longitude
                     dir = 'NW'
                 else:
                     dir = 'SW'

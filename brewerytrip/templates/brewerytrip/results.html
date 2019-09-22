@@ -11,7 +11,17 @@
 <h1>These are the results :)</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 {% if latitude and longitude %}
-    <p>Here goes the result...</p>
+
+    {% if result %}
+        <ul>
+            {% for var in result %}
+                <li>{{ var }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No list is available.</p>
+    {% endif %}
+
 {% else %}
     <p>Oopsie! How did you get here?</p>
 {% endif %}
