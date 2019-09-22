@@ -5,6 +5,7 @@ from operator import itemgetter
 from haversine import haversine as distance
 import numpy as np
 import math
+
 __all__ = ['Brewery', 'Beer', 'Geocode']
 
 
@@ -13,28 +14,77 @@ def greedy_star(home):
     measured_list = list_distance(home, total_list)  # Count distances, directions; general list with coordinates
     layer, dir = layer_and_direction(measured_list)
     if (layer == 0):
-        area = sorted(filter(lambda x: x[4] == dir and 0 <= x[2] < 350, measured_list), key=itemgetter(1), reverse=True)
+        area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 350, measured_list), key=itemgetter(1), reverse=True)
     elif (layer == 1):
-        area = sorted(filter(lambda x: x[4] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1), reverse=True)
+        area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1), reverse=True)
     else:
-        area = sorted(filter(lambda x: x[4] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
+        area = sorted(filter(lambda x: x[3] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
                       reverse=True)
     km = 2000
     collected_beers = 0
     point = home
-    detour = detour_list(home, area[0][5], area[0][2], area)
-    queue = recount_distance(home, area[0], 300, detour)
-    total = 0
-    for var in queue:
-        total += distance(point, var[5])
-        collected_beers += var[1]
-        point = var[5]
-    print(total)
-    print(collected_beers)
+    changed = True
+    while km - distance(point, area[0][4]) - distance(area[0][4], home) >= 0 and changed:
+        changed = False
+        detour = detour_list(point, area[0][4], area[0][2], area)
+        queue = make_queue(point, area[0], km - distance(point, area[0][4]) - distance(area[0][4], home), detour)
+        total = 0
+        for var in queue:
+            total += distance(point, var[4])
+            collected_beers += var[1]
+            area.remove(var)
+            point = var[4]
+            changed = True
+        km -= total
+        print(km)
+        print(collected_beers)
+        area = recount_distances(point, area)
+    km -= distance(point, home)
+    print(km)
     return queue
 
 
-def recount_distance(start, end, km, detour):
+"""
+    detour = detour_list(home, area[0][4], area[0][2], area)
+    queue = make_queue(home, area[0], 300, detour)
+    total = 0
+    for var in queue:
+        total += distance(point, var[4])
+        collected_beers += var[1]
+        area.remove(var)
+        point = var[4]
+
+    print(total)
+    print(collected_beers)
+
+    area = recount_distances(point, area)
+
+    detour = detour_list(point, area[0][4], area[0][2], area)
+    queue = make_queue(point, area[0], 300, detour)
+    for var in queue:
+        total += distance(point, var[4])
+        collected_beers += var[1]
+        area.remove(var)
+        point = var[4]
+    print(total)
+    print(collected_beers)
+
+    area = recount_distances(point, area)
+
+    detour = detour_list(point, area[0][4], area[0][2], area)
+    queue = make_queue(point, area[0], 300, detour)
+    for var in queue:
+        total += distance(point, var[4])
+        collected_beers += var[1]
+        area.remove(var)
+        point = var[4]
+    print(total)
+    print(collected_beers)
+"""
+
+
+def make_queue(start, end, km, detour):
+    if (km > 300): km = 250
     queue = [end]
     while km > 0 and len(detour) > 0:
         total_distance = 0
@@ -42,12 +92,16 @@ def recount_distance(start, end, km, detour):
         detour.pop(0)
         point = start
         for var in queue:
-            total_distance += distance(point, var[5])
-            point = var[5]
-        if (km < total_distance - end[2]): queue.pop(0)
+            total_distance += distance(point, var[4])
+            point = var[4]
+        if km < total_distance - end[2]: queue.pop(0)
     return queue
 
 
+def recount_distances(point, area):
+    for var in area:
+        var[2] = distance(point, var[4])
+    return area
 
 
 def pick(dir, list, point):
@@ -91,31 +145,31 @@ def layer_and_direction(list):
     directions = [['NE', 0], ['SE', 0], ['NW', 0], ['SW', 0]]
     for var in list:
         if 0 <= var[2] < 350:
-            if (var[4] == 'NE'):
+            if (var[3] == 'NE'):
                 directions[0][1] += var[1]
-            elif (var[4] == 'SE'):
+            elif (var[3] == 'SE'):
                 directions[1][1] += var[1]
-            elif (var[4] == 'NW'):
+            elif (var[3] == 'NW'):
                 directions[2][1] += var[1]
             else:
                 directions[3][1] += var[1]
             group[0] += var[1]
         elif 350 <= var[2] < 700:
-            if (var[4] == 'NE'):
+            if (var[3] == 'NE'):
                 directions[0][1] += var[1]
-            elif (var[4] == 'SE'):
+            elif (var[3] == 'SE'):
                 directions[1][1] += var[1]
-            elif (var[4] == 'NW'):
+            elif (var[3] == 'NW'):
                 directions[2][1] += var[1]
             else:
                 directions[3][1] += var[1]
             group[1] += var[1]
         else:
-            if (var[4] == 'NE'):
+            if (var[3] == 'NE'):
                 directions[0][1] += var[1]
-            elif (var[4] == 'SE'):
+            elif (var[3] == 'SE'):
                 directions[1][1] += var[1]
-            elif (var[4] == 'NW'):
+            elif (var[3] == 'NW'):
                 directions[2][1] += var[1]
             else:
                 directions[3][1] += 1
@@ -138,7 +192,7 @@ def layer_and_direction(list):
 
 
 def detour_list(start, end, distance, area):
-    return list(filter(lambda x: x[2] < distance and edge(start, end, x[5]) <= 5, area))
+    return list(filter(lambda x: x[2] < distance and edge(start, end, x[4]) <= 5, area))
 
 
 # Count edge of a triangle
@@ -150,16 +204,16 @@ def edge(start, end, mid):
     return degree
 
 
-#Find out value by 4 directions
+# Find out value by 4 directions
 def weigh_directions(list):
-    list = sorted(list, key=itemgetter(4))
+    list = sorted(list, key=itemgetter(3))
     directions = [['SE', 0], ['SW', 0], ['NE', 0], ['NW', 0]]
     for var in list:
-        if var[4] == 'NE':
+        if var[3] == 'NE':
             directions[2][1] += var[3]
-        elif var[4] == 'NW':
+        elif var[3] == 'NW':
             directions[3][1] += var[3]
-        elif var[4] == 'SE':
+        elif var[3] == 'SE':
             directions[0][1] += var[3]
         else:
             directions[1][1] += var[3]
@@ -178,7 +232,7 @@ def get_list(point, dis):
     return list
 
 
-#Set reference direction: North, South, West, East
+# Set reference direction: North, South, West, East
 def direction(reference_point, point):
     if (point[0] >= reference_point[0] and point[1] >= reference_point[1]):  # Latitude
         return 'NE'

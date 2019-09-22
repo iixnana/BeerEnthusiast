@@ -20,7 +20,6 @@ class BreweryManager(models.Manager):
             if beers > 0:  # remove breweries if they have 0 beers in them
                 coord = Geocode.objects.coordinates(var.id)
                 dis = distance(point, coord)
-                value = beers * (1 - (dis / 1000))
                 dir = []  # set direction
                 if (coord[0] >= point[0] and coord[1] >= point[1]):  # Latitude
                     dir = 'NE'
@@ -30,7 +29,7 @@ class BreweryManager(models.Manager):
                     dir = 'NW'
                 else:
                     dir = 'SW'
-                coord_list.append((var.id, beers, dis, value, dir, coord))
+                coord_list.append([var.id, beers, dis, dir, coord])
         return coord_list
 
 class Brewery(models.Model):
