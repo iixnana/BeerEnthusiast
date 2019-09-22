@@ -3,7 +3,51 @@ from .beer import Beer
 from .geocode import Geocode
 from operator import itemgetter
 from haversine import haversine as distance
+import numpy as np
+import math
 __all__ = ['Brewery', 'Beer', 'Geocode']
+
+
+def greedy_star(home):
+    total_list = get_list(home, 1000)  # 1000km radius is maximum distance we can reach
+    measured_list = list_distance(home, total_list)  # Count distances, directions; general list with coordinates
+    layer, dir = layer_and_direction(measured_list)
+    if (layer == 0):
+        area = sorted(filter(lambda x: x[4] == dir and 0 <= x[2] < 350, measured_list), key=itemgetter(1), reverse=True)
+    elif (layer == 1):
+        area = sorted(filter(lambda x: x[4] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1), reverse=True)
+    else:
+        area = sorted(filter(lambda x: x[4] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
+                      reverse=True)
+    km = 2000
+    collected_beers = 0
+    point = home
+    detour = detour_list(home, area[0][5], area[0][2], area)
+    queue = recount_distance(home, area[0], 300, detour)
+    total = 0
+    for var in queue:
+        total += distance(point, var[5])
+        collected_beers += var[1]
+        point = var[5]
+    print(total)
+    print(collected_beers)
+    return queue
+
+
+def recount_distance(start, end, km, detour):
+    queue = [end]
+    while km > 0 and len(detour) > 0:
+        total_distance = 0
+        queue.insert(0, detour[0])
+        detour.pop(0)
+        point = start
+        for var in queue:
+            total_distance += distance(point, var[5])
+            point = var[5]
+        if (km < total_distance - end[2]): queue.pop(0)
+    return queue
+
+
 
 
 def pick(dir, list, point):
@@ -27,6 +71,7 @@ def pick(dir, list, point):
     print("Group 1 %s" % group[1])
     print("Group 2 %s" % group[2])
     group1 = sorted(group1, key=itemgetter(3), reverse=True)
+    group0 = sorted(group0, key=itemgetter(3), reverse=True)
     km = 2000
     collected_beers = 0
     home = point
@@ -40,6 +85,72 @@ def pick(dir, list, point):
     return km
 
 
+# Count value of layers and directions
+def layer_and_direction(list):
+    group = [0, 0, 0]
+    directions = [['NE', 0], ['SE', 0], ['NW', 0], ['SW', 0]]
+    for var in list:
+        if 0 <= var[2] < 350:
+            if (var[4] == 'NE'):
+                directions[0][1] += var[1]
+            elif (var[4] == 'SE'):
+                directions[1][1] += var[1]
+            elif (var[4] == 'NW'):
+                directions[2][1] += var[1]
+            else:
+                directions[3][1] += var[1]
+            group[0] += var[1]
+        elif 350 <= var[2] < 700:
+            if (var[4] == 'NE'):
+                directions[0][1] += var[1]
+            elif (var[4] == 'SE'):
+                directions[1][1] += var[1]
+            elif (var[4] == 'NW'):
+                directions[2][1] += var[1]
+            else:
+                directions[3][1] += var[1]
+            group[1] += var[1]
+        else:
+            if (var[4] == 'NE'):
+                directions[0][1] += var[1]
+            elif (var[4] == 'SE'):
+                directions[1][1] += var[1]
+            elif (var[4] == 'NW'):
+                directions[2][1] += var[1]
+            else:
+                directions[3][1] += 1
+            group[2] += var[1]
+    if (group[0] >= group[1] and group[0] >= group[2]):
+        layer = 0
+    elif (group[1] >= group[0] and group[1] >= group[2]):
+        layer = 1
+    else:
+        layer = 2
+    if (directions[0] >= directions[1] and directions[0] >= directions[2] and directions[0] >= directions[3]):
+        dir = 'NE'
+    elif (directions[1] >= directions[0] and directions[1] >= directions[2] and directions[1] >= directions[3]):
+        dir = 'SE'
+    elif (directions[2] >= directions[1] and directions[2] >= directions[0] and directions[2] >= directions[3]):
+        dir = 'NW'
+    else:
+        dir = 'SW'
+    return layer, dir
+
+
+def detour_list(start, end, distance, area):
+    return list(filter(lambda x: x[2] < distance and edge(start, end, x[5]) <= 5, area))
+
+
+# Count edge of a triangle
+def edge(start, end, mid):
+    c = distance(start, end)
+    b = distance(start, mid)
+    a = distance(mid, end)
+    degree = math.degrees(np.arccos((b ** 2 + c ** 2 - a ** 2) / (2 * b * c)))
+    return degree
+
+
+#Find out value by 4 directions
 def weigh_directions(list):
     list = sorted(list, key=itemgetter(4))
     directions = [['SE', 0], ['SW', 0], ['NE', 0], ['NW', 0]]
@@ -55,18 +166,19 @@ def weigh_directions(list):
     return max(directions)[0]
 
 
-def measure_distance(point, filtered):
+# Measure distances to all breweries from a reference point
+def list_distance(point, filtered):
     list = Brewery.objects.filtered_coordinates(point, filtered)
-    list = sorted(list, key=itemgetter(1), reverse=True)  # put priority on breweries, which have lots of beer kinds
     return list
 
 
-def list(point, dis):
+# Filter breweries in set distance, for example in radius of 1000km
+def get_list(point, dis):
     list = Brewery.objects.filter_breweries(point, dis)
-    print(len(list))
     return list
 
 
+#Set reference direction: North, South, West, East
 def direction(reference_point, point):
     if (point[0] >= reference_point[0] and point[1] >= reference_point[1]):  # Latitude
         return 'NE'
