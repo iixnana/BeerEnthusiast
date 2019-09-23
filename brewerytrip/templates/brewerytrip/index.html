@@ -9,14 +9,19 @@
 </head>
 <body>
 <div class="container">
-
-    <h1>Welcome to Brewery Trip!</h1>
-
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to Brewery Trip!</h1>
+        <p class="lead">Enter your preferred latitude and longitude as a home location to start journey on collecting
+            beer</p>
+        <hr class="my-4">
+        {% if error_message %}
+            <div class="alert alert-danger" role="alert">
+                {{ error_message }}
+            </div>
+        {% endif %}
     <div class="row align-items-center">
-<br/>
-
-<form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
+        <div class="mx-auto" style="width: 800px;">
+            <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
     {% csrf_token %}
     <div class="form-group">
         <input type="text" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"/>
@@ -27,20 +32,20 @@
     </div>
     <button type="submit" class="btn btn-success">Submit</button>
 </form>
+            <br/>
+            <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
+                {% csrf_token %}
+                <input type="hidden" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"
+                       value="51.355468"/>
+                <input type="hidden" id="longitude" name="longitude" required class="form-control"
+                       placeholder="Longitude"
+                       value="11.100790"/>
+                <button type="submit" class="btn btn-danger">Try (51.355468, 11.100790)</button>
 
-
-        <br/>
-        <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
-            {% csrf_token %}
-            <input type="hidden" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"
-                   value="51.355468"/>
-            <input type="hidden" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"
-                   value="11.100790"/>
-            <button type="submit" class="btn btn-danger">Try (51.355468, 11.100790)</button>
-
-        </form>
-
+            </form>
+        </div>
     </div>
+</div>
 </div>
 </body>
 </html>

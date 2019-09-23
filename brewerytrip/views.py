@@ -7,7 +7,8 @@ from . import models
 
 def index(request):
     point = (51.355468, 11.100790)
-    return render(request, 'brewerytrip/index.html')
+    context = {'error_message': ''}
+    return render(request, 'brewerytrip/index.html', context)
 
 
 def debug(request, brewery_id):
@@ -17,8 +18,12 @@ def debug(request, brewery_id):
 
 
 def results(request):
-    latitude = float(request.POST['latitude'])
-    longitude = float(request.POST['longitude'])
+    try:
+        latitude = float(request.POST['latitude'])
+        longitude = float(request.POST['longitude'])
+    except ValueError:
+        context = {'error_message': "Latitude and longitude has to be numbers"}
+        return render(request, 'brewerytrip/index.html', context)
     route, total_distance, total_beer_types, total_time = models.get_greedy_star((latitude, longitude))
     context = {'latitude': latitude,
                'longitude': longitude,
