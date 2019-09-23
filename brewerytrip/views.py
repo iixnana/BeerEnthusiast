@@ -7,11 +7,7 @@ from . import models
 
 def index(request):
     point = (51.355468, 11.100790)
-    breweries = models.greedy_star(point)
-    # breweries = models.Brewery.objects.order_by('name')[:10]
-    context = {'list': breweries,
-               'first_stop': point}
-    return render(request, 'brewerytrip/index.html', context)
+    return render(request, 'brewerytrip/index.html')
 
 
 def debug(request, brewery_id):
@@ -23,8 +19,11 @@ def debug(request, brewery_id):
 def results(request):
     latitude = float(request.POST['latitude'])
     longitude = float(request.POST['longitude'])
-    result = models.greedy_star((latitude, longitude))
+    route, beers, total_distance, total_beer_types = models.get_greedy_star((latitude, longitude))
     context = {'latitude': latitude,
                'longitude': longitude,
-               'result': result}
+               'route': route,
+               'beers': beers,
+               'total_distance': total_distance,
+               'total_beer_types': total_beer_types}
     return render(request, 'brewerytrip/results.html', context)

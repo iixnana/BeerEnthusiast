@@ -11,6 +11,9 @@ class BreweryManager(models.Manager):
                 filtered.append(brewery)
         return filtered
 
+    def find_by_id(self, id):
+        return self.get(id__exact=id)
+
     def filtered_coordinates(self, point, list):
         from brewerytrip.models import Geocode
         from brewerytrip.models import Beer
@@ -20,7 +23,6 @@ class BreweryManager(models.Manager):
             if beers > 0:  # remove breweries if they have 0 beers in them
                 coord = Geocode.objects.coordinates(var.id)
                 dis = distance(point, coord)
-                dir = []  # set direction
                 if coord[0] >= point[0] and coord[1] >= point[1]:  # Latitude
                     dir = 'NE'
                 elif coord[0] <= point[0] and coord[1] >= point[1]:

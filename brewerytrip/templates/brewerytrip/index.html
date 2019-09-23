@@ -8,21 +8,14 @@
     <title>Brewery Trip</title>
 </head>
 <body>
-<h1>Welcome to Brewery Trip!</h1>
+<div class="container">
+
+    <h1>Welcome to Brewery Trip!</h1>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-
-<form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
-    {% csrf_token %}
-    <input type="hidden" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"
-           value="51.355468"/>
-    <input type="hidden" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"
-           value="11.100790"/>
-    <button type="submit" class="btn btn-primary">Try (51.355468, 11.100790)</button>
-
-</form>
+    <div class="row align-items-center">
 <br/>
+
 <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
     {% csrf_token %}
     <div class="form-group">
@@ -32,8 +25,22 @@
         <input type="text" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"/>
 
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" class="btn btn-success">Submit</button>
 </form>
 
+
+        <br/>
+        <form action="{% url 'brewerytrip:results' %}" method="post" class="form-inline">
+            {% csrf_token %}
+            <input type="hidden" id="latitude" name="latitude" required class="form-control" placeholder="Latitude"
+                   value="51.355468"/>
+            <input type="hidden" id="longitude" name="longitude" required class="form-control" placeholder="Longitude"
+                   value="11.100790"/>
+            <button type="submit" class="btn btn-danger">Try (51.355468, 11.100790)</button>
+
+        </form>
+
+    </div>
+</div>
 </body>
 </html>

@@ -7,7 +7,7 @@ class BeerManager(models.Manager):
         return self.filter(brewery_id__exact=id).count()
 
     def beer_types(self, id):
-        return self.filter(brewery_id__exact=id)
+        return list(self.filter(brewery_id__exact=id))
 
 
 class Beer(models.Model):

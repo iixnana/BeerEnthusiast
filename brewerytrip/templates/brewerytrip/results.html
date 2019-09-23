@@ -8,16 +8,34 @@
     <title>Brewery Trip</title>
 </head>
 <body>
+<div class="container">
 <h1>These are the results :)</h1>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 {% if latitude and longitude %}
 
-    {% if result %}
-        <ul>
-            {% for var in result %}
-                <li>{{ var }}</li>
+    {% if route %}
+        <table class="table table-hover">
+            <thead class="bg-warning">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ID</th>
+                <th scope="col">Title</th>
+                <th scope="col">Distance</th>
+                <th scope="col">Beers count</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for var in route %}
+                <tr>
+                    <th scope="row">-></th>
+                    <td>{{ var.0 }}</td>
+                    <td>{{ var.1 }}</td>
+                    <td>{{ var.2 }}</td>
+                    <td>#</td>
+                </tr>
             {% endfor %}
-        </ul>
+            </tbody>
+        </table>
     {% else %}
         <p>No list is available.</p>
     {% endif %}
@@ -27,5 +45,6 @@
 {% endif %}
 <li><a href="{% url 'brewerytrip:index' %}">Try other coordinates...</a></li>
 
+</div>
 </body>
 </html>

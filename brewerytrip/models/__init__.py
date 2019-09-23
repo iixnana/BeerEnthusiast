@@ -3,10 +3,33 @@ from .beer import Beer
 from .geocode import Geocode
 from operator import itemgetter
 from haversine import haversine as distance
+from copy import deepcopy
 import numpy as np
 import math
 
 __all__ = ['Brewery', 'Beer', 'Geocode']
+
+
+def get_greedy_star(home):
+    route = greedy_star(home)
+    total_distance = 0
+    total_beer_types = 0
+    beers = []
+    route_with_titles = []
+    for stop in route:
+        total_distance += stop[2]
+        total_beer_types += stop[1]
+        beers.append(Beer.objects.beer_types(stop[0]))
+        if stop[0] != 0:
+            route_with_titles.append((stop[0], Brewery.objects.find_by_id(stop[0]).name, round(stop[2], 3), stop[1]))
+        else:
+            route_with_titles.append(('HOME', home, stop[2], stop[1]))
+    """breweries = []
+    for stop in route:
+        if stop[0] == 0 and route[0] == stop: breweries.append("-> HOME: %s DISTANCE: %s km" % (home, stop[2]))
+        elif stop[0] != 0: breweries.append("-> ID: %s DISTANCE: %s BEERS: %s" % (stop[0], stop[2], stop[1]))
+        else: breweries.append("<- HOME: %s DISTANCE: %s km" % (home, stop[2]))"""
+    return route_with_titles, beers, total_distance, total_beer_types
 
 
 # Main algorithm, where home is coordinates tuple for HOME location
@@ -15,52 +38,69 @@ def greedy_star(home):
     measured_list = list_distance(home, total_list)  # Count distances, directions; general list with coordinates
     layer, dir = layer_and_direction(measured_list)  # Get a sense of which direction and layer is the best target
     if layer == 0:  # Area for searching. From 0 to 450
-        area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 450, measured_list), key=itemgetter(1), reverse=True)
+        set_area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 450, measured_list), key=itemgetter(1),
+                          reverse=True)
     elif layer == 1:  # Area for searching. From 0 to 700
-        area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1), reverse=True)
+        set_area = sorted(filter(lambda x: x[3] == dir and 0 <= x[2] < 700, measured_list), key=itemgetter(1),
+                          reverse=True)
     else:  # Area for searching. From 350 to 1000
-        area = sorted(filter(lambda x: x[3] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
-                      reverse=True)
-    km = 2000  # Fuel capacity at 2000km
-    collected_beers = 0
-    point = home
+        set_area = sorted(filter(lambda x: x[3] == dir and 350 <= x[2] <= 1000, measured_list), key=itemgetter(1),
+                          reverse=True)
+    max_beers = 0
     home_var = [0, 0, 0, 'HOME', home]
-    changed = True
-    route = [home_var]
-    while km - distance(point, area[0][4]) - distance(area[0][4], home) >= 0 and changed:
-        changed = False
-        detour = detour_list(point, area[0][4], area[0][2], area)
-        queue = make_queue(point, area[0], km - distance(point, area[0][4]) - distance(area[0][4], home), detour)
-        total = 0
-        for var in queue:
-            total += distance(point, var[4])
-            collected_beers += var[1]
-            area.remove(var)
-            point = var[4]
-            route.append(var)
-            changed = True
-        km -= total
-        area = recount_distances(point, area)
-    if km - distance(point, home) >= 0:
-        total = 0
-        home_var[2] = distance(point, home)
-        detour = detour_list(point, home, home_var[2], area)
-        queue = make_queue(point, home_var, km - home_var[2], detour)
-        for var in queue:
-            total += distance(point, var[4])
-            collected_beers += var[1]
-            point = var[4]
-            route.append(var)
-        km -= total
-        print("Finished with %dkm left. Collected %s" % (km, collected_beers))
-    else:
-        print("Error :(")
-    return route
+    max_km = 250
+    max_route = []
+    for x in range(15, 19):
+        # Reset copy of area
+        area = deepcopy(set_area)
+        km = 2000  # Fuel capacity at 2000km
+        point = home  # Starting point
+        changed = True
+        route = [(home_var[0], home_var[1], 0)]
+        collected_beers = 0
+        # Check if you are able to travel to the next point and then be able to go home
+        while km - distance(point, area[0][4]) - distance(area[0][4], home) >= 0 and changed:
+            changed = False
+            detour = detour_list(point, area[0][4], area[0][2], area, x)
+            queue = make_queue(point, area[0], km - distance(point, area[0][4]) - distance(area[0][4], home), detour,
+                               max_km)
+            total = 0
+            for var in queue:
+                km_dist = distance(point, var[4])
+                total += km_dist
+                collected_beers += var[1]
+                area.remove(var)
+                point = var[4]
+                route.append((var[0], var[1], km_dist))
+                changed = True
+            km -= total
+            area = recount_distances(point, area)
+        if km - distance(point, home) >= 0:
+            total = 0
+            home_var[2] = distance(point, home)
+            detour = detour_list(point, home, home_var[2], area, x)
+            queue = make_queue(point, home_var, km - home_var[2], detour, km - home_var[2])
+            for var in queue:
+                km_dist = distance(point, var[4])
+                total += km_dist
+                collected_beers += var[1]
+                point = var[4]
+                route.append((var[0], var[1], km_dist))
+            km -= total
+            if max_beers < collected_beers:
+                max_beers = collected_beers
+                max_route.clear()
+                max_route = route
+                print(">>>")
+            print("Finished with %dkm left. Collected %s. %s degree" % (km, collected_beers, x))
+        else:
+            print("Error :(")
+    return max_route
 
 
 # Find best detour points. List is sorted by beer types count in the brewery, so breweries with most value get priority
-def make_queue(start, end, km, detour):
-    if km > 250: km = 250
+def make_queue(start, end, km, detour, max_km):
+    if km > max_km: km = max_km
     queue = [end]
     while km > 0 and len(detour) > 0:
         total_distance = 0
@@ -134,8 +174,8 @@ def layer_and_direction(filtered_list):
 
 
 # Filter area to breweries on 10 degrees, up to
-def detour_list(start, end, dist, area):
-    return list(filter(lambda x: x[2] < dist and edge(start, end, x[4]) <= 17, area))
+def detour_list(start, end, dist, area, degrees):
+    return list(filter(lambda x: x[2] < dist and edge(start, end, x[4]) <= degrees, area))
 
 
 # Count edge of a triangle
