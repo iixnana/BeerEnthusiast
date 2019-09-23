@@ -14,24 +14,32 @@
 {% if latitude and longitude %}
 
     {% if route %}
+        <p>Traveled {{ total_distance }}km and collected {{ total_beer_types }} beers.</p>
+
+        <p>Route:</p>
         <table class="table table-hover">
             <thead class="bg-warning">
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">ID</th>
-                <th scope="col">Title</th>
+                <th scope="col">Brewery title</th>
                 <th scope="col">Distance</th>
                 <th scope="col">Beers count</th>
+                <th scope="col">Beers</th>
             </tr>
             </thead>
             <tbody>
             {% for var in route %}
                 <tr>
-                    <th scope="row">-></th>
+                    <th scope="row"> ></th>
                     <td>{{ var.0 }}</td>
                     <td>{{ var.1 }}</td>
                     <td>{{ var.2 }}</td>
-                    <td>#</td>
+                    <td>{{ var.3 }}</td>
+                    <td width="500px">
+                        <ul class="list-inline"> {% for beer in var.4 %}
+                            <li class=list-inline-item">{{ beer }};</li> {% endfor %}</ul>
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

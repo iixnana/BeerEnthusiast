@@ -6,6 +6,7 @@ from haversine import haversine as distance
 from copy import deepcopy
 import numpy as np
 import math
+import time
 
 __all__ = ['Brewery', 'Beer', 'Geocode']
 
@@ -19,16 +20,12 @@ def get_greedy_star(home):
     for stop in route:
         total_distance += stop[2]
         total_beer_types += stop[1]
-        beers.append(Beer.objects.beer_types(stop[0]))
         if stop[0] != 0:
-            route_with_titles.append((stop[0], Brewery.objects.find_by_id(stop[0]).name, round(stop[2], 3), stop[1]))
+            beers.append(Beer.objects.beer_types(stop[0]))
+            route_with_titles.append((stop[0], Brewery.objects.find_by_id(stop[0]).name, round(stop[2], 2), stop[1],
+                                      Beer.objects.beer_types(stop[0])))
         else:
-            route_with_titles.append(('HOME', home, stop[2], stop[1]))
-    """breweries = []
-    for stop in route:
-        if stop[0] == 0 and route[0] == stop: breweries.append("-> HOME: %s DISTANCE: %s km" % (home, stop[2]))
-        elif stop[0] != 0: breweries.append("-> ID: %s DISTANCE: %s BEERS: %s" % (stop[0], stop[2], stop[1]))
-        else: breweries.append("<- HOME: %s DISTANCE: %s km" % (home, stop[2]))"""
+            route_with_titles.append(('HOME', home, round(stop[2], 2), stop[1]))
     return route_with_titles, beers, total_distance, total_beer_types
 
 
