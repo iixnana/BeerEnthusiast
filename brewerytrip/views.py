@@ -19,11 +19,11 @@ def debug(request, brewery_id):
 def results(request):
     latitude = float(request.POST['latitude'])
     longitude = float(request.POST['longitude'])
-    route, beers, total_distance, total_beer_types = models.get_greedy_star((latitude, longitude))
+    route, total_distance, total_beer_types, total_time = models.get_greedy_star((latitude, longitude))
     context = {'latitude': latitude,
                'longitude': longitude,
                'route': route,
-               'beers': beers,
+               'total_time': total_time,
                'total_distance': total_distance,
                'total_beer_types': total_beer_types}
     return render(request, 'brewerytrip/results.html', context)

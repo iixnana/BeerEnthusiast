@@ -9,34 +9,35 @@
 </head>
 <body>
 <div class="container">
-<h1>These are the results :)</h1>
+    <h1>Results</h1>
+    <a class="btn btn-warning" href="{% url 'brewerytrip:index' %}" role="button">Try other coordinates...</a>
+    <br/>
+    <br/>
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-{% if latitude and longitude %}
-
     {% if route %}
-        <p>Traveled {{ total_distance }}km and collected {{ total_beer_types }} beers.</p>
-
+        <h4>Traveled <b>{{ total_distance }} km</b> and collected <b>{{ total_beer_types }} beers</b>.</h4>
+        <p>Algorithm took: {{ total_time }} seconds</p>
         <p>Route:</p>
         <table class="table table-hover">
-            <thead class="bg-warning">
+            <thead>
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">ID</th>
                 <th scope="col">Brewery title</th>
                 <th scope="col">Distance</th>
                 <th scope="col">Beers count</th>
-                <th scope="col">Beers</th>
+                <th scope="col" width="550px">Beers</th>
             </tr>
             </thead>
             <tbody>
             {% for var in route %}
                 <tr>
-                    <th scope="row"> ></th>
+                    <th scope="row">➔</th>
                     <td>{{ var.0 }}</td>
                     <td>{{ var.1 }}</td>
                     <td>{{ var.2 }}</td>
                     <td>{{ var.3 }}</td>
-                    <td width="500px">
+                    <td>
                         <ul class="list-inline"> {% for beer in var.4 %}
                             <li class=list-inline-item">{{ beer }};</li> {% endfor %}</ul>
                     </td>
@@ -45,14 +46,9 @@
             </tbody>
         </table>
     {% else %}
-        <p>No list is available.</p>
-    {% endif %}
-
-{% else %}
-    <p>Oopsie! How did you get here?</p>
+        <p>Route was not found.</p>
 {% endif %}
-<li><a href="{% url 'brewerytrip:index' %}">Try other coordinates...</a></li>
-
+    <br/>
 </div>
 </body>
 </html>
