@@ -11,12 +11,6 @@ def index(request):
     return render(request, 'brewerytrip/index.html', context)
 
 
-def debug(request, brewery_id):
-    geoloc = models.Geocode.objects.coordinates(brewery_id)
-    beers = models.Beer.objects.beer_count(brewery_id)
-    return HttpResponse("Brewery {} {} {}".format(geoloc[0], geoloc[1], beers))
-
-
 def results(request):
     try:
         latitude = float(request.POST['latitude'])
